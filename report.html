@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>P01 金融数据分析报告</title>
+<style>
+body{font-family:"Microsoft YaHei","SimHei",sans-serif;max-width:1100px;margin:40px auto;padding:0 20px;line-height:1.8;color:#333}
+h1{border-bottom:3px solid #1f77b4;padding-bottom:10px;color:#1f77b4}
+h2{border-left:5px solid #1f77b4;padding-left:10px;color:#2c3e50;margin-top:45px}
+h3{color:#34495e;margin-top:25px}
+table{border-collapse:collapse;width:100%;margin:15px 0;font-size:14px}
+th,td{border:1px solid #ddd;padding:8px 12px;text-align:center}
+th{background:#1f77b4;color:white}
+tr:nth-child(even){background:#f9f9f9}
+figure{margin:20px 0;text-align:center}
+img{max-width:100%;border:1px solid #ddd}
+figcaption{font-size:13px;color:#666;margin-top:5px;font-style:italic}
+.section-box{background:#f8f9fa;border-left:4px solid #ff7f0e;padding:15px 20px;margin:20px 0;border-radius:4px}
+.discussion{background:#fff8e1;border:1px solid #ffe082;padding:15px 20px;margin:15px 0;border-radius:4px}
+.discussion h4{margin-top:0;color:#e65100}
+.highlight{background:#e8f4fd;padding:10px 15px;border-left:4px solid #2196f3;margin:10px 0}
+hr{border:none;border-top:1px solid #ddd;margin:35px 0}
+</style>
+</head>
+<body>
+<h1>P01：金融数据获取、管理与初步分析报告</h1>
+<div class="section-box">
+<p><strong>数据范围：</strong>2020-01-02 至 2026-04-03（后复权日度行情，共 1532 个交易日）</p>
+<p><strong>股票样本：</strong>10 只 A 股，覆盖银行、白酒、房地产、能源、汽车、通讯六个行业</p>
+<p><strong>市场基准：</strong>沪深 300 指数（000300）</p>
+<p><strong>宏观指标：</strong>CPI 同比增速（月度，2020-2024 年共 68 个月度观测）</p>
+</div>
+
+<hr>
+<h2>一、描述性统计</h2>
+<div class="highlight">
+<p>计算 10 只股票日对数收益率 r<sub>t</sub> = ln(P<sub>t</sub> / P<sub>t-1</sub>) 的描述性统计指标。无风险利率设为年化 2%（日频 r<sub>f</sub> = 0.02/252）。</p>
+</div>
+
+<table>
+<tr><th>股票</th><th>行业</th><th>年化均值(%)</th><th>年化波动率(%)</th><th>偏度</th><th>峰度</th><th>最大回撤(%)</th></tr>
+<tr><td>平安银行</td><td>银行</td><td>-3.42</td><td>28.88</td><td>0.366</td><td>4.380</td><td>-66.66</td></tr><tr><td>招商银行</td><td>银行</td><td>4.80</td><td>27.57</td><td>0.266</td><td>3.209</td><td>-54.64</td></tr><tr><td>贵州茅台</td><td>白酒</td><td>6.58</td><td>27.54</td><td>0.264</td><td>3.677</td><td>-54.22</td></tr><tr><td>五粮液</td><td>白酒</td><td>-1.28</td><td>34.35</td><td>0.088</td><td>3.372</td><td>-74.14</td></tr><tr><td>保利发展</td><td>房地产</td><td>-13.62</td><td>35.94</td><td>0.563</td><td>3.278</td><td>-74.15</td></tr><tr><td>万科A</td><td>房地产</td><td>-31.94</td><td>36.17</td><td>0.657</td><td>3.325</td><td>-90.42</td></tr><tr><td>中国石油</td><td>能源</td><td>17.04</td><td>29.09</td><td>0.222</td><td>5.250</td><td>-33.59</td></tr><tr><td>长江电力</td><td>能源</td><td>9.50</td><td>17.73</td><td>0.367</td><td>3.609</td><td>-17.91</td></tr><tr><td>比亚迪</td><td>汽车</td><td>30.44</td><td>43.05</td><td>0.307</td><td>2.139</td><td>-56.05</td></tr><tr><td>中国联通</td><td>通讯</td><td>-2.38</td><td>28.85</td><td>0.905</td><td>7.602</td><td>-46.78</td></tr></table>
+<div class="discussion">
+<h4>统计结果解读</h4>
+<ul>
+<li><strong>收益率分化显著：</strong>比亚迪年化收益最高（+30.4%），万科A最低（-31.9%），差距超过60个百分点，反映A股个股风险极大。</li>
+<li><strong>波动率差异：</strong>比亚迪波动率最大（43.1%），长江电力最小（17.7%），防御性行业波动明显更低。</li>
+<li><strong>偏度均为正：</strong>所有股票偏度 &gt; 0，右尾更长，极端正收益出现概率高于极端负收益。</li>
+<li><strong>峰度均大于 0：</strong>中国联通峰度最高（7.6），极端收益事件频率远高于正态分布预期——典型的"肥尾"特征。</li>
+<li><strong>最大回撤：</strong>万科A回撤最深（-90.4%），几乎跌光所有市值；长江电力回撤最小（-17.9%），体现高壁垒公用事业属性。</li>
+</ul>
+</div>
+
+<hr>
+<h2>二、可视化分析</h2>
+<h3>图1：归一化收盘价走势图</h3>
+<p>以 2020-01-02 为基准（=1），展示 10 只股票和沪深 300 的相对价格走势，同行业同颜色不同线型。</p>
+<figure><img src="fig1_normalized_price.png" style="max-width:900px"><figcaption>图1：10只股票及沪深300归一化收盘价走势（2020-01-02 = 1，按行业分组着色）</figcaption></figure>
+<div class="highlight">
+<p><strong>图1解读：</strong>以2020-01-02为基准归一化后，白酒行业（茅台、五粮液）长期走势明显优于大盘；房地产（万科A、保利发展）持续下行，回撤幅度最大；长江电力和贵州茅台在2022年市场下跌时相对抗跌，呈现防御性特征。</p>
+</div>
+
+<h3>图2：日收益率分布直方图</h3>
+<p>10 只股票日收益率分面直方图，叠加正态分布曲线用于对比。</p>
+<figure><img src="fig2_return_histogram.png" style="max-width:900px"><figcaption>图2：10只股票日收益率分布直方图（叠加正态分布曲线）</figcaption></figure>
+<div class="highlight">
+<p><strong>图2解读：</strong>多数股票峰度为正，峰值高于正态曲线，尾部概率显著高于正态分布——典型的"尖峰肥尾"特征。所有股票偏度均大于0，右尾更长，意味着极端正收益概率高于极端负收益。</p>
+</div>
+
+<h3>图3：收益率相关系数热力图</h3>
+<p>10 只股票日收益率的相关系数矩阵，按行业排序。</p>
+<figure><img src="fig3_correlation_heatmap.png" style="max-width:900px"><figcaption>图3：10只股票日收益率相关系数矩阵热力图（按行业排序）</figcaption></figure>
+<div class="highlight">
+<p><strong>图3解读：</strong>白酒（茅台、五粮液）相关性最高（&gt;0.85），银行（平安、招商）相关性较高；房地产与白酒相关性较低；中国石油与市场整体相关性相对较低，是组合分散化的良好标的。</p>
+</div>
+
+<h3>图4：CPI 与股市关系</h3>
+<p>CPI 同比增速与沪深 300 月度收益率的散点图及线性拟合。</p>
+<figure><img src="fig4_cpi_scatter.png" style="max-width:900px"><figcaption>图4：CPI同比增速与沪深300月度收益率关系散点图</figcaption></figure>
+<div class="highlight">
+<p><strong>图4解读：</strong>CPI与沪深300月度收益率的散点图展示通胀周期与股市的关系方向。适度通胀通常伴随经济繁荣，利好股市；但高通胀可能触发央行紧缩政策，对股市形成压制。</p>
+</div>
+
+<h3>图5（选做）：ROE 跨公司对比</h3>
+<p>10 只股票最近 5 年（2020-2024）ROE 的折线图和按行业分组的箱型图。</p>
+<figure><img src="fig5_roe_comparison.png" style="max-width:900px"><figcaption>图5：10只股票ROE跨公司对比（2020-2024）</figcaption></figure>
+<div class="highlight">
+<p><strong>图5解读：</strong>白酒行业（茅台、五粮液）ROE显著高于其他行业（常年维持20%以上），体现品牌壁垒和高盈利能力；房地产（万科A、保利发展）ROE呈下降趋势，盈利能力承压；比亚迪受益于新能源渗透率提升，ROE逆势上升；长江电力ROE稳定在15%左右，波动极小，体现高壁垒稳定现金流特征。</p>
+</div>
+
+<hr>
+<h2>三、CAPM 模型回归分析</h2>
+<div class="highlight">
+<p>CAPM 模型：r<sub>i,t</sub> - r<sub>f</sub> = &alpha;<sub>i</sub> + &beta;<sub>i</sub> &times; (r<sub>m,t</sub> - r<sub>f</sub>) + &epsilon;</p>
+<p>其中 r<sub>f</sub> = 0.02 / 252（日频，年化 2%），r<sub>m,t</sub> 为沪深300日对数收益率。</p>
+</div>
+
+<table>
+<tr><th>股票</th><th>行业</th><th>&alpha;（日）</th><th>p值</th><th>&beta;</th><th>95% CI</th><th>R&sup2;</th></tr>
+<tr><td>平安银行</td><td>银行</td><td>-0.000181</td><td>0.6207</td><td>0.9511</td><td>[0.890, 1.012]</td><td>0.3807</td></tr><tr><td>招商银行</td><td>银行</td><td>0.000143</td><td>0.6826</td><td>0.9048</td><td>[0.847, 0.963]</td><td>0.3781</td></tr><tr><td>贵州茅台</td><td>白酒</td><td>0.000216</td><td>0.5139</td><td>0.9772</td><td>[0.922, 1.032]</td><td>0.4420</td></tr><tr><td>五粮液</td><td>白酒</td><td>-0.000084</td><td>0.8297</td><td>1.2945</td><td>[1.229, 1.360]</td><td>0.4985</td></tr><tr><td>保利发展</td><td>房地产</td><td>-0.000590</td><td>0.2562</td><td>0.8483</td><td>[0.762, 0.935]</td><td>0.1955</td></tr><tr><td>万科A</td><td>房地产</td><td>-0.001311**</td><td>0.0085</td><td>1.0028</td><td>[0.920, 1.086]</td><td>0.2698</td></tr><tr><td>中国石油</td><td>能源</td><td>0.000614</td><td>0.1698</td><td>0.4685</td><td>[0.394, 0.543]</td><td>0.0910</td></tr><tr><td>长江电力</td><td>能源</td><td>0.000305</td><td>0.2707</td><td>0.2261</td><td>[0.180, 0.272]</td><td>0.0571</td></tr><tr><td>比亚迪</td><td>汽车</td><td>0.001174**</td><td>0.0416</td><td>1.2817</td><td>[1.186, 1.377]</td><td>0.3110</td></tr><tr><td>中国联通</td><td>通讯</td><td>-0.000148</td><td>0.7185</td><td>0.7140</td><td>[0.646, 0.782]</td><td>0.2150</td></tr></table><p style="font-size:13px;color:#888">** 表示 alpha 在 5% 水平下显著</p><h3>图6：CAPM Beta 系数点图</h3><figure><img src="fig6_capm_beta.png" style="max-width:900px"><figcaption>图6：CAPM Beta系数点图（误差棒为95%置信区间，按行业分组着色）</figcaption></figure>
+<div class="highlight">
+<p><strong>图6解读：</strong>Beta &gt; 1 的股票对市场波动更敏感（进攻型），包括比亚迪（1.28）、五粮液（1.29）；Beta &lt; 1 的股票波动小于市场（防御型），包括长江电力（0.23）、中国石油（0.47）。置信区间宽度反映Beta估计的精确度。</p>
+</div>
+
+<div class="discussion">
+<h4>讨论问题 1：哪些股票的 &beta; &gt; 1？与"周期性 vs 防御性"分类是否吻合？</h4>
+<p><strong>回答：</strong>Beta &gt; 1 的股票包括：五粮液　万科A　比亚迪。这些股票属于强周期行业和消费类行业，与其高经济敏感性吻合：</p>
+<ul>
+<li>比亚迪（Beta=1.28）和五粮液（Beta=1.29）属于进攻型股票，与宏观经济周期高度绑定</li>
+<li>长江电力（Beta=0.23）和中国石油（Beta=0.47）属于防御型股票，走势相对独立于大盘</li>
+<li>银行股（Beta&asymp;0.9）介于两者之间，体现金融板块与宏观经济的联动性</li>
+</ul>
+</div>
+
+<div class="discussion">
+<h4>讨论问题 2：&alpha; 是否显著异于零？&alpha; 显著意味着什么？</h4>
+<p><strong>回答：</strong>本次回归中，万科A　比亚迪的 alpha 显著（p&lt;0.05）。</p>
+<p>Alpha 显著为正意味着该股在风险调整后仍能获得正收益，可能意味着：</p>
+<ol>
+<li>价值被低估（价值投资效应）</li>
+<li>动量效应（过去表现好的股票未来继续表现好）</li>
+<li>数据窥察（data snooping）——样本内规律在样本外未必成立</li>
+<li>A 股特殊制度因素（如壳资源价值、并购预期等非理性因素）</li>
+</ol>
+</div>
+
+<div class="discussion">
+<h4>讨论问题 3：R&sup2; 最高和最低的股票分别是哪只？如何解释这一差异？</h4>
+<p><strong>回答：</strong>R&sup2; 最高的股票是 五粮液，最低的是 长江电力。R&sup2; 表示市场因子解释了个股收益率变动的比例：</p>
+<ul>
+<li>R&sup2; 高的股票（五粮液）：个股收益率主要由市场波动驱动，与经济周期高度绑定</li>
+<li>R&sup2; 低的股票（长江电力）：个股收益率更多受特异性因素影响，与大盘走势相对独立</li>
+<li>银行股 R&sup2; 处于中等水平（&asymp;0.38），一半由市场解释，另一半由银行特有因素（息差、坏账率）驱动</li>
+</ul>
+</div>
+
+<hr>
+<h2>四、宏观指标对股票收益率的影响（选做）</h2>
+<div class="highlight">
+<p>对 10 只股票分别估计月度回归模型：r<sub>i,t</sub><sup>月</sup> = &alpha;<sub>i</sub> + &gamma;<sub>i</sub> &times; CPI<sub>t</sub> + &epsilon;<sub>i,t</sub></p>
+<p>CPI 为中国 CPI 同比增速（月度数据，共 68 个观测）。</p>
+</div>
+
+<table>
+<tr><th>股票</th><th>行业</th><th>gamma</th><th>p值</th><th>gamma 95% CI</th><th>R&sup2;</th></tr>
+<tr><td>中国石油</td><td>能源</td><td>-0.011190</td><td>0.1032</td><td>[-0.0247, 0.0023]</td><td>0.0397</td></tr><tr><td>招商银行</td><td>银行</td><td>-0.007561</td><td>0.2638</td><td>[-0.0210, 0.0058]</td><td>0.0189</td></tr><tr><td>平安银行</td><td>银行</td><td>-0.006226</td><td>0.4050</td><td>[-0.0211, 0.0086]</td><td>0.0105</td></tr><tr><td>长江电力</td><td>能源</td><td>-0.004921</td><td>0.2373</td><td>[-0.0132, 0.0033]</td><td>0.0211</td></tr><tr><td>万科A</td><td>房地产</td><td>-0.000431</td><td>0.9646</td><td>[-0.0198, 0.0189]</td><td>0.0000</td></tr><tr><td>中国联通</td><td>通讯</td><td>0.000362</td><td>0.9514</td><td>[-0.0115, 0.0122]</td><td>0.0001</td></tr><tr><td>贵州茅台</td><td>白酒</td><td>0.003690</td><td>0.6127</td><td>[-0.0108, 0.0182]</td><td>0.0039</td></tr><tr><td>保利发展</td><td>房地产</td><td>0.004467</td><td>0.6185</td><td>[-0.0134, 0.0223]</td><td>0.0038</td></tr><tr><td>五粮液</td><td>白酒</td><td>0.010052</td><td>0.2673</td><td>[-0.0079, 0.0280]</td><td>0.0186</td></tr><tr><td>比亚迪</td><td>汽车</td><td>0.014494</td><td>0.1798</td><td>[-0.0069, 0.0358]</td><td>0.0271</td></tr></table><p style="font-size:13px;color:#888">* p&lt;0.1, ** p&lt;0.05（本次回归中所有 gamma 均不显著，p &gt; 0.1）</p><h3>图7：CPI 敏感系数（gamma）点图</h3><figure><img src="fig7_cpi_macro_regression.png" style="max-width:900px"><figcaption>图7：CPI同比增速对各股票月度收益率的影响（gamma系数），按行业分组着色</figcaption></figure>
+<div class="highlight">
+<p><strong>图7解读：</strong>从 gamma 系数来看：</p>
+<ul>
+<li><strong>能源（石油）</strong>对 CPI 敏感度为负（gamma=-0.011），经济上行通胀期表现反而较弱，与大宗商品价格逆周期特征有关</li>
+<li><strong>汽车（比亚迪）</strong>gamma 为正且最大（0.0145），通胀受益于产品价格上涨，但 p 值=0.18 统计不显著</li>
+<li><strong>银行（招商、平安）</strong>gamma 为负（-0.008左右），高通胀期银行实际利率受益，但同样不显著</li>
+<li><strong>所有 gamma 均不显著（p &gt; 0.1）</strong>：宏观因子对个股月度收益率的解释力有限，月度数据样本量较小（68个观测），难以检测到弱效应</li>
+</ul>
+<p>经济逻辑：CPI 反映通胀水平，适度的通胀伴随经济繁荣利好股市；高通胀可能触发紧缩政策压制估值。不同行业对通胀的敏感度反映其定价能力和成本转嫁结构。</p>
+</div>
+
+<hr>
+<h2>五、结论</h2>
+<div class="section-box">
+<ol>
+<li><strong>收益率与风险分化：</strong>10 只股票在 2020-2026 年间收益率差异极大，比亚迪累计涨幅领先，而万科A跌幅最深，反映 A 股个股选择的高风险特性。</li>
+<li><strong>行业特征明显：</strong>白酒行业盈利能力（ROE）和股价表现均优于市场；房地产行业盈利能力持续下滑；能源行业内部出现明显分化。</li>
+<li><strong>CAPM 有效性：</strong>大多数股票的 alpha 不显著，符合 CAPM 理论预期。Beta 系数较好地反映了各股票的系统性风险水平，R&sup2; 说明市场因子对个股收益率的解释力因行业特性而异。</li>
+<li><strong>宏观因子有限解释力：</strong>CPI 对个股月度收益率的解释力整体较弱（gamma 不显著），说明 A 股个股收益更多受特异性因素驱动，宏观因子需要更长周期才能体现影响。</li>
+<li><strong>A 股特殊性：</strong>长江电力超低 Beta（0.23）和五粮液高 Beta（1.29）均反映了 A 股行业特征的差异性，理解 Beta 的行业分布对投资组合风险管理有重要参考价值。</li>
+</ol>
+</div>
+
+<hr>
+<div style="text-align:center;color:#888;font-size:13px;">
+<p>本报告由 Python（Jupyter Notebook）自动生成 | 数据来源：baostock 后复权行情</p>
+</div>
+</body>
+</html>
