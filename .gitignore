@@ -1,10 +1,10 @@
-# 原始数据（通过运行 01_download.ipynb 重新下载生成）
+# 原始数据
 data/stock/
 data/index/
 data/macro/
 data/finance/
 
-# 数据库文件（运行清洗 Notebook 时生成）
+# 数据库文件
 *.db
 fin_data.db
 
@@ -19,6 +19,3 @@ __pycache__/
 *.pyc
 *.pyo
 *.egg-info/
-
-/.quarto/
-**/*.quarto_ipynb
