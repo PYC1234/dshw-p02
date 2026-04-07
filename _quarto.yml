@@ -10,6 +10,20 @@ book:
   repo-url: "https://github.com/PYC1234/dshw-p01"
   repo-actions: [issue]
 
+  sidebar:    # 侧边栏配置
+    title: "金融数据获取、管理与初步分析"
+    logo: images/book-logo.png
+    logo-href: https://pyc1234.github.io/dshw-p01/
+    style: floating  #docked
+    search: true
+    tools:
+      - icon: github
+        href: https://pyc1234.github.io/dshw-p01/
+
+  favicon: images/book-logo.png   # URL logo
+  site-url: https://pyc1234.github.io/dshw-p01/ 
+  editor: source    # 始终采用源代码模式编辑
+
   chapters:
     - index.qmd
     - 01_download.ipynb
