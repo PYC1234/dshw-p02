@@ -56,7 +56,7 @@
 4. 运行 `03_regression_analysis.ipynb` 查看分析结果
 5. 运行 `04_capm_analysis.ipynb` 查看CAPM回归结果
 
-### 从头重建（他人克隆后）
+### 从头重建
 
 ```bash
 git clone https://github.com/PYC1234/dshw-p01.git
