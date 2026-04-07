@@ -1,11 +1,12 @@
-# 原始数据（体积较大，通过运行 Notebook 重新下载）
+# 原始数据（通过运行 01_download.ipynb 重新下载生成）
 data/stock/
 data/index/
 data/macro/
 data/finance/
 
-# 数据库文件
+# 数据库文件（运行清洗 Notebook 时生成）
 *.db
+fin_data.db
 
 # Notebook 缓存
 .ipynb_checkpoints/

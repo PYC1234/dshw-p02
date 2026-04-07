@@ -51,31 +51,56 @@ https://github.com/PYC1234/dshw-p01
 ### 如何运行
 
 1. 安装依赖：`pip install -r requirements.txt`
-2. 运行 `01_download.ipynb` 下载原始数据
-3. 运行 `02_clean.ipynb` 清洗并存储数据
+2. 运行 `01_download.ipynb` 下载原始数据（会自动创建 `data/stock/`、`data/index/`、`data/macro/`、`data/finance/` 目录）
+3. 运行 `02_clean.ipynb` 清洗并存储数据（生成 `data/clean/`、`data/combined/`、`fin_data.db`）
 4. 运行 `03_regression_analysis.ipynb` 查看分析结果
 5. 运行 `04_capm_analysis.ipynb` 查看分析结果
 6. 打开 `report.html` 阅读完整报告
+
+### 从头重建（他人克隆后）
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/PYC1234/dshw-p01.git
+cd dshw-p01
+
+# 2. 安装依赖
+pip install -r requirements.txt
+
+# 3. 依次运行 4 个 Notebook
+jupyter notebook 01_download.ipynb   # 下载原始数据
+jupyter notebook 02_clean.ipynb     # 清洗数据
+jupyter notebook 03_regression_analysis.ipynb  # CAPM 分析
+jupyter notebook 04_capm_analysis.ipynb        # CAPM + 宏观回归
+
+# 4. 打开 report.html 查看完整报告
+```
+
+> **说明**：`data/stock/`、`data/index/`、`data/macro/`、`data/finance/` 不上传 GitHub（体积较大），通过步骤 3 重新下载生成。`*.db` 为 SQLite 中间文件，也不上传。
+
+### .gitignore 说明
+
+以下文件不上传 GitHub：
+- `data/stock/`、`data/index/`、`data/macro/`、`data/finance/`：原始数据，通过 `01_download.ipynb` 重新下载
+- `*.db`、`fin_data.db`：SQLite 数据库文件，运行 `02_clean.ipynb` 时自动生成
+- `.ipynb_checkpoints/`：Jupyter Notebook 执行缓存
+- `__pycache__/`、`.DS_Store`：系统/Python 临时文件
 
 ### 项目结构
 
 ```
 dshw-p01/                ← GitHub 仓库根目录
 ├── README.md
-├── report.html
+├── report.html          ← 完整分析报告（可直接浏览器打开）
 ├── requirements.txt
 ├── .gitignore
-├── 01_download.ipynb
-├── 02_clean.ipynb
-├── 03_regression_analysis.ipynb
-├── 04_capm_analysis.ipynb
+├── 01_download.ipynb    ← Step 1：下载原始数据
+├── 02_clean.ipynb       ← Step 2：数据清洗
+├── 03_regression_analysis.ipynb ← Step 3：描述性统计 + 可视化
+├── 04_capm_analysis.ipynb       ← Step 4：CAPM 回归 + 宏观回归
 ├── data/
-│   ├── stock/           ← 个股行情原始数据（CSV）
-│   ├── index/           ← 指数数据（CSV）
-│   ├── macro/           ← 宏观数据（CSV）
-│   ├── finance/         ← 财务数据（CSV）
-│   ├── clean/           ← 清洗后数据
+│   ├── clean/           ← 清洗后数据（CSV + Parquet）
 │   └── combined/        ← 合并后综合数据
-├── output/              ← 图形输出（PNG）
-└── download_log.txt     ← 下载日志
+├── output/              ← 图形输出（PNG）+ 结果表格（CSV）
+└── download_log.txt   ← 下载日志
 ```
