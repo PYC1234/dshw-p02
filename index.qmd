@@ -5,8 +5,6 @@ author: "PYC1234"
 date: "2026-04-07"
 ---
 
-# 金融数据获取、管理与初步分析
-
 <img src="images/book-front.png" width="350"/>
 
 ---
