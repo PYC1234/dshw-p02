@@ -44,6 +44,12 @@
 - CSV格式优点：通用性强，无需特殊库即可打开，文本可读
 - CSV格式力不从心时：数据量大时读取慢、内存占用高；不支持数据类型契约；嵌套结构支持差
 
+### 在线电子书
+
+**访问地址**：https://PYC1234.github.io/dshw-p01/
+
+本项目同时以 Quarto 电子书形式发布，包含完整的章节导航、图表和代码分析。
+
 ### GitHub 仓库
 
 https://github.com/PYC1234/dshw-p01
@@ -94,6 +100,17 @@ dshw-p01/                ← GitHub 仓库根目录
 ├── report.html          ← 完整分析报告（可直接浏览器打开）
 ├── requirements.txt
 ├── .gitignore
+├── _quarto.yml          ← Quarto 电子书配置
+├── index.qmd            ← 电子书封面
+├── 01_data_download.qmd ← 第1章：数据下载
+├── 02_data_cleaning.qmd← 第2章：数据清洗
+├── 03_data_storage.qmd ← 第3章：数据存储
+├── 04_descriptive_analysis.qmd ← 第4章：描述性统计
+├── 05_capm_regression.qmd      ← 第5章：CAPM回归
+├── 06_cpi_macro_regression.qmd ← 第6章：CPI宏观回归
+├── references.qmd        ← 参考文献
+├── appendix_data_dict.qmd ← 附录：数据字典
+├── .github/workflows/quarto-publish.yml ← GitHub Pages 自动部署
 ├── 01_download.ipynb    ← Step 1：下载原始数据
 ├── 02_clean.ipynb       ← Step 2：数据清洗
 ├── 03_regression_analysis.ipynb ← Step 3：描述性统计 + 可视化

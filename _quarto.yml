@@ -1,0 +1,44 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "金融数据获取、管理与初步分析"
+  subtitle: "基于CAPM模型的A股实证研究"
+  author: "PYC1234"
+  date: "2026-04-07"
+  repo-url: "https://github.com/PYC1234/dshw-p01"
+  repo-actions: [issue]
+
+  chapters:
+    - index.qmd
+    - part: "数据获取与管理"
+      chapters:
+        - 01_data_download.qmd
+        - 02_data_cleaning.qmd
+        - 03_data_storage.qmd
+    - part: "数据分析"
+      chapters:
+        - 04_descriptive_analysis.qmd
+        - 05_capm_regression.qmd
+        - 06_cpi_macro_regression.qmd
+    - references.qmd
+
+  appendices:
+    - appendix_data_dict.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    number-sections: true
+    anchor-sections: true
+    smooth-scroll: true
+    code-copy: true
+  pdf:
+    documentclass: report
+
+execute:
+  echo: false
+  warning: false
+  cache: true
