@@ -55,35 +55,35 @@ hr{border:none;border-top:1px solid #ddd;margin:35px 0}
 <h2>二、可视化分析</h2>
 <h3>图1：归一化收盘价走势图</h3>
 <p>以 2020-01-02 为基准（=1），展示 10 只股票和沪深 300 的相对价格走势，同行业同颜色不同线型。</p>
-<figure><img src="fig1_normalized_price.png" style="max-width:900px"><figcaption>图1：10只股票及沪深300归一化收盘价走势（2020-01-02 = 1，按行业分组着色）</figcaption></figure>
+<figure><img src="output/fig1_normalized_price.png" style="max-width:900px"><figcaption>图1：10只股票及沪深300归一化收盘价走势（2020-01-02 = 1，按行业分组着色）</figcaption></figure>
 <div class="highlight">
 <p><strong>图1解读：</strong>以2020-01-02为基准归一化后，白酒行业（茅台、五粮液）长期走势明显优于大盘；房地产（万科A、保利发展）持续下行，回撤幅度最大；长江电力和贵州茅台在2022年市场下跌时相对抗跌，呈现防御性特征。</p>
 </div>
 
 <h3>图2：日收益率分布直方图</h3>
 <p>10 只股票日收益率分面直方图，叠加正态分布曲线用于对比。</p>
-<figure><img src="fig2_return_histogram.png" style="max-width:900px"><figcaption>图2：10只股票日收益率分布直方图（叠加正态分布曲线）</figcaption></figure>
+<figure><img src="output/fig2_return_histogram.png" style="max-width:900px"><figcaption>图2：10只股票日收益率分布直方图（叠加正态分布曲线）</figcaption></figure>
 <div class="highlight">
 <p><strong>图2解读：</strong>多数股票峰度为正，峰值高于正态曲线，尾部概率显著高于正态分布——典型的"尖峰肥尾"特征。所有股票偏度均大于0，右尾更长，意味着极端正收益概率高于极端负收益。</p>
 </div>
 
 <h3>图3：收益率相关系数热力图</h3>
 <p>10 只股票日收益率的相关系数矩阵，按行业排序。</p>
-<figure><img src="fig3_correlation_heatmap.png" style="max-width:900px"><figcaption>图3：10只股票日收益率相关系数矩阵热力图（按行业排序）</figcaption></figure>
+<figure><img src="output/fig3_correlation_heatmap.png" style="max-width:900px"><figcaption>图3：10只股票日收益率相关系数矩阵热力图（按行业排序）</figcaption></figure>
 <div class="highlight">
 <p><strong>图3解读：</strong>白酒（茅台、五粮液）相关性最高（&gt;0.85），银行（平安、招商）相关性较高；房地产与白酒相关性较低；中国石油与市场整体相关性相对较低，是组合分散化的良好标的。</p>
 </div>
 
 <h3>图4：CPI 与股市关系</h3>
 <p>CPI 同比增速与沪深 300 月度收益率的散点图及线性拟合。</p>
-<figure><img src="fig4_cpi_scatter.png" style="max-width:900px"><figcaption>图4：CPI同比增速与沪深300月度收益率关系散点图</figcaption></figure>
+<figure><img src="output/fig4_cpi_scatter.png" style="max-width:900px"><figcaption>图4：CPI同比增速与沪深300月度收益率关系散点图</figcaption></figure>
 <div class="highlight">
 <p><strong>图4解读：</strong>CPI与沪深300月度收益率的散点图展示通胀周期与股市的关系方向。适度通胀通常伴随经济繁荣，利好股市；但高通胀可能触发央行紧缩政策，对股市形成压制。</p>
 </div>
 
 <h3>图5（选做）：ROE 跨公司对比</h3>
 <p>10 只股票最近 5 年（2020-2024）ROE 的折线图和按行业分组的箱型图。</p>
-<figure><img src="fig5_roe_comparison.png" style="max-width:900px"><figcaption>图5：10只股票ROE跨公司对比（2020-2024）</figcaption></figure>
+<figure><img src="output/fig5_roe_comparison.png" style="max-width:900px"><figcaption>图5：10只股票ROE跨公司对比（2020-2024）</figcaption></figure>
 <div class="highlight">
 <p><strong>图5解读：</strong>白酒行业（茅台、五粮液）ROE显著高于其他行业（常年维持20%以上），体现品牌壁垒和高盈利能力；房地产（万科A、保利发展）ROE呈下降趋势，盈利能力承压；比亚迪受益于新能源渗透率提升，ROE逆势上升；长江电力ROE稳定在15%左右，波动极小，体现高壁垒稳定现金流特征。</p>
 </div>
@@ -97,7 +97,7 @@ hr{border:none;border-top:1px solid #ddd;margin:35px 0}
 
 <table>
 <tr><th>股票</th><th>行业</th><th>&alpha;（日）</th><th>p值</th><th>&beta;</th><th>95% CI</th><th>R&sup2;</th></tr>
-<tr><td>平安银行</td><td>银行</td><td>-0.000181</td><td>0.6207</td><td>0.9511</td><td>[0.890, 1.012]</td><td>0.3807</td></tr><tr><td>招商银行</td><td>银行</td><td>0.000143</td><td>0.6826</td><td>0.9048</td><td>[0.847, 0.963]</td><td>0.3781</td></tr><tr><td>贵州茅台</td><td>白酒</td><td>0.000216</td><td>0.5139</td><td>0.9772</td><td>[0.922, 1.032]</td><td>0.4420</td></tr><tr><td>五粮液</td><td>白酒</td><td>-0.000084</td><td>0.8297</td><td>1.2945</td><td>[1.229, 1.360]</td><td>0.4985</td></tr><tr><td>保利发展</td><td>房地产</td><td>-0.000590</td><td>0.2562</td><td>0.8483</td><td>[0.762, 0.935]</td><td>0.1955</td></tr><tr><td>万科A</td><td>房地产</td><td>-0.001311**</td><td>0.0085</td><td>1.0028</td><td>[0.920, 1.086]</td><td>0.2698</td></tr><tr><td>中国石油</td><td>能源</td><td>0.000614</td><td>0.1698</td><td>0.4685</td><td>[0.394, 0.543]</td><td>0.0910</td></tr><tr><td>长江电力</td><td>能源</td><td>0.000305</td><td>0.2707</td><td>0.2261</td><td>[0.180, 0.272]</td><td>0.0571</td></tr><tr><td>比亚迪</td><td>汽车</td><td>0.001174**</td><td>0.0416</td><td>1.2817</td><td>[1.186, 1.377]</td><td>0.3110</td></tr><tr><td>中国联通</td><td>通讯</td><td>-0.000148</td><td>0.7185</td><td>0.7140</td><td>[0.646, 0.782]</td><td>0.2150</td></tr></table><p style="font-size:13px;color:#888">** 表示 alpha 在 5% 水平下显著</p><h3>图6：CAPM Beta 系数点图</h3><figure><img src="fig6_capm_beta.png" style="max-width:900px"><figcaption>图6：CAPM Beta系数点图（误差棒为95%置信区间，按行业分组着色）</figcaption></figure>
+<tr><td>平安银行</td><td>银行</td><td>-0.000181</td><td>0.6207</td><td>0.9511</td><td>[0.890, 1.012]</td><td>0.3807</td></tr><tr><td>招商银行</td><td>银行</td><td>0.000143</td><td>0.6826</td><td>0.9048</td><td>[0.847, 0.963]</td><td>0.3781</td></tr><tr><td>贵州茅台</td><td>白酒</td><td>0.000216</td><td>0.5139</td><td>0.9772</td><td>[0.922, 1.032]</td><td>0.4420</td></tr><tr><td>五粮液</td><td>白酒</td><td>-0.000084</td><td>0.8297</td><td>1.2945</td><td>[1.229, 1.360]</td><td>0.4985</td></tr><tr><td>保利发展</td><td>房地产</td><td>-0.000590</td><td>0.2562</td><td>0.8483</td><td>[0.762, 0.935]</td><td>0.1955</td></tr><tr><td>万科A</td><td>房地产</td><td>-0.001311**</td><td>0.0085</td><td>1.0028</td><td>[0.920, 1.086]</td><td>0.2698</td></tr><tr><td>中国石油</td><td>能源</td><td>0.000614</td><td>0.1698</td><td>0.4685</td><td>[0.394, 0.543]</td><td>0.0910</td></tr><tr><td>长江电力</td><td>能源</td><td>0.000305</td><td>0.2707</td><td>0.2261</td><td>[0.180, 0.272]</td><td>0.0571</td></tr><tr><td>比亚迪</td><td>汽车</td><td>0.001174**</td><td>0.0416</td><td>1.2817</td><td>[1.186, 1.377]</td><td>0.3110</td></tr><tr><td>中国联通</td><td>通讯</td><td>-0.000148</td><td>0.7185</td><td>0.7140</td><td>[0.646, 0.782]</td><td>0.2150</td></tr></table><p style="font-size:13px;color:#888">** 表示 alpha 在 5% 水平下显著</p><h3>图6：CAPM Beta 系数点图</h3><figure><img src="output/fig6_capm_beta.png" style="max-width:900px"><figcaption>图6：CAPM Beta系数点图（误差棒为95%置信区间，按行业分组着色）</figcaption></figure>
 <div class="highlight">
 <p><strong>图6解读：</strong>Beta &gt; 1 的股票对市场波动更敏感（进攻型），包括比亚迪（1.28）、五粮液（1.29）；Beta &lt; 1 的股票波动小于市场（防御型），包括长江电力（0.23）、中国石油（0.47）。置信区间宽度反映Beta估计的精确度。</p>
 </div>
@@ -143,7 +143,7 @@ hr{border:none;border-top:1px solid #ddd;margin:35px 0}
 
 <table>
 <tr><th>股票</th><th>行业</th><th>gamma</th><th>p值</th><th>gamma 95% CI</th><th>R&sup2;</th></tr>
-<tr><td>中国石油</td><td>能源</td><td>-0.011190</td><td>0.1032</td><td>[-0.0247, 0.0023]</td><td>0.0397</td></tr><tr><td>招商银行</td><td>银行</td><td>-0.007561</td><td>0.2638</td><td>[-0.0210, 0.0058]</td><td>0.0189</td></tr><tr><td>平安银行</td><td>银行</td><td>-0.006226</td><td>0.4050</td><td>[-0.0211, 0.0086]</td><td>0.0105</td></tr><tr><td>长江电力</td><td>能源</td><td>-0.004921</td><td>0.2373</td><td>[-0.0132, 0.0033]</td><td>0.0211</td></tr><tr><td>万科A</td><td>房地产</td><td>-0.000431</td><td>0.9646</td><td>[-0.0198, 0.0189]</td><td>0.0000</td></tr><tr><td>中国联通</td><td>通讯</td><td>0.000362</td><td>0.9514</td><td>[-0.0115, 0.0122]</td><td>0.0001</td></tr><tr><td>贵州茅台</td><td>白酒</td><td>0.003690</td><td>0.6127</td><td>[-0.0108, 0.0182]</td><td>0.0039</td></tr><tr><td>保利发展</td><td>房地产</td><td>0.004467</td><td>0.6185</td><td>[-0.0134, 0.0223]</td><td>0.0038</td></tr><tr><td>五粮液</td><td>白酒</td><td>0.010052</td><td>0.2673</td><td>[-0.0079, 0.0280]</td><td>0.0186</td></tr><tr><td>比亚迪</td><td>汽车</td><td>0.014494</td><td>0.1798</td><td>[-0.0069, 0.0358]</td><td>0.0271</td></tr></table><p style="font-size:13px;color:#888">* p&lt;0.1, ** p&lt;0.05（本次回归中所有 gamma 均不显著，p &gt; 0.1）</p><h3>图7：CPI 敏感系数（gamma）点图</h3><figure><img src="fig7_cpi_macro_regression.png" style="max-width:900px"><figcaption>图7：CPI同比增速对各股票月度收益率的影响（gamma系数），按行业分组着色</figcaption></figure>
+<tr><td>中国石油</td><td>能源</td><td>-0.011190</td><td>0.1032</td><td>[-0.0247, 0.0023]</td><td>0.0397</td></tr><tr><td>招商银行</td><td>银行</td><td>-0.007561</td><td>0.2638</td><td>[-0.0210, 0.0058]</td><td>0.0189</td></tr><tr><td>平安银行</td><td>银行</td><td>-0.006226</td><td>0.4050</td><td>[-0.0211, 0.0086]</td><td>0.0105</td></tr><tr><td>长江电力</td><td>能源</td><td>-0.004921</td><td>0.2373</td><td>[-0.0132, 0.0033]</td><td>0.0211</td></tr><tr><td>万科A</td><td>房地产</td><td>-0.000431</td><td>0.9646</td><td>[-0.0198, 0.0189]</td><td>0.0000</td></tr><tr><td>中国联通</td><td>通讯</td><td>0.000362</td><td>0.9514</td><td>[-0.0115, 0.0122]</td><td>0.0001</td></tr><tr><td>贵州茅台</td><td>白酒</td><td>0.003690</td><td>0.6127</td><td>[-0.0108, 0.0182]</td><td>0.0039</td></tr><tr><td>保利发展</td><td>房地产</td><td>0.004467</td><td>0.6185</td><td>[-0.0134, 0.0223]</td><td>0.0038</td></tr><tr><td>五粮液</td><td>白酒</td><td>0.010052</td><td>0.2673</td><td>[-0.0079, 0.0280]</td><td>0.0186</td></tr><tr><td>比亚迪</td><td>汽车</td><td>0.014494</td><td>0.1798</td><td>[-0.0069, 0.0358]</td><td>0.0271</td></tr></table><p style="font-size:13px;color:#888">* p&lt;0.1, ** p&lt;0.05（本次回归中所有 gamma 均不显著，p &gt; 0.1）</p><h3>图7：CPI 敏感系数（gamma）点图</h3><figure><img src="output/fig7_cpi_gamma.png" style="max-width:900px"><figcaption>图7：CPI同比增速对各股票月度收益率的影响（gamma系数），按行业分组着色</figcaption></figure>
 <div class="highlight">
 <p><strong>图7解读：</strong>从 gamma 系数来看：</p>
 <ul>
