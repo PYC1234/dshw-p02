@@ -5,6 +5,7 @@
 **访问地址**：https://PYC1234.github.io/dshw-p01/
 
 本项目以 Quarto 电子书形式发布，包含完整的章节导航、图表和代码分析。
+同时包含完整版report.html 和 简要版report_summary.html
 
 ### 股票列表
 
