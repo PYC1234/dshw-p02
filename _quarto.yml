@@ -35,8 +35,6 @@ format:
     anchor-sections: true
     smooth-scroll: true
     code-copy: true
-  pdf:
-    documentclass: report
 
 execute:
   echo: false
