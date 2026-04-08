@@ -11,7 +11,7 @@ book:
   repo-actions: [issue]
 
   sidebar:    # 侧边栏配置
-    title: "金融数据获取、管理与初步分析"
+    #title: "金融数据获取、管理与初步分析"
     logo: images/book-logo.png
     style: floating  #docked
     search: true
