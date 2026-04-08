@@ -15,9 +15,9 @@ book:
     logo: images/book-logo.png
     style: floating  #docked
     search: true
-    tools:
-      - icon: github
-        href: https://pyc1234.github.io/dshw-p02/
+    # tools:
+      # - icon: github
+      #  href: https://pyc1234.github.io/dshw-p02/
 
   favicon: images/book-logo.png   # URL logo
   site-url: https://pyc1234.github.io/dshw-p02/ 
