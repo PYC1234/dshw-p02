@@ -15,13 +15,10 @@ book:
     logo: images/book-logo.png
     style: floating  #docked
     search: true
-    # tools:
-      # - icon: github
-      #  href: https://pyc1234.github.io/dshw-p02/
 
-  favicon: images/book-logo.png   # URL logo
-  site-url: https://pyc1234.github.io/dshw-p02/ 
-  editor: source    # 始终采用源代码模式编辑
+  # favicon: images/book-logo.png   # URL logo
+  # site-url: https://pyc1234.github.io/dshw-p02/ 
+  # editor: source    # 始终采用源代码模式编辑
 
   chapters:
     - index.qmd
