@@ -2,7 +2,7 @@
 
 ### 在线电子书
 
-**访问地址**：https://PYC1234.github.io/dshw-p01/
+**访问地址**：https://PYC1234.github.io/dshw-p02/
 
 本项目以 Quarto 电子书形式发布，包含完整的章节导航、图表和代码分析。
 
@@ -61,8 +61,8 @@
 ### 从头重建
 
 ```bash
-git clone https://github.com/PYC1234/dshw-p01.git
-cd dshw-p01
+git clone https://github.com/PYC1234/dshw-p02.git
+cd dshw-p02
 pip install -r requirements.txt
 jupyter notebook 01_download.ipynb
 jupyter notebook 02_clean.ipynb
@@ -83,4 +83,4 @@ jupyter notebook 04_capm_analysis.ipynb
 
 ### GitHub 仓库
 
-https://github.com/PYC1234/dshw-p01
+https://github.com/PYC1234/dshw-p02

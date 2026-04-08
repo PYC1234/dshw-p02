@@ -7,21 +7,20 @@ book:
   subtitle: "基于CAPM模型的A股实证研究"
   author: "PYC1234"
   date: "2026-04-07"
-  repo-url: "https://github.com/PYC1234/dshw-p01"
+  repo-url: "https://github.com/PYC1234/dshw-p02"
   repo-actions: [issue]
 
   sidebar:    # 侧边栏配置
     title: "金融数据获取、管理与初步分析"
     logo: images/book-logo.png
-    logo-href: https://pyc1234.github.io/dshw-p01/
     style: floating  #docked
     search: true
     tools:
       - icon: github
-        href: https://pyc1234.github.io/dshw-p01/
+        href: https://pyc1234.github.io/dshw-p02/
 
   favicon: images/book-logo.png   # URL logo
-  site-url: https://pyc1234.github.io/dshw-p01/ 
+  site-url: https://pyc1234.github.io/dshw-p02/ 
   editor: source    # 始终采用源代码模式编辑
 
   chapters:

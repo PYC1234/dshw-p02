@@ -1,0 +1,41 @@
+{
+  "index.qmd": {
+    "index.html": "e2befc55"
+  },
+  "01_data_download.qmd": {
+    "01_data_download.html": "4a7e198a"
+  },
+  "02_data_cleaning.qmd": {
+    "02_data_cleaning.html": "8b68dbb0"
+  },
+  "03_data_storage.qmd": {
+    "03_data_storage.html": "d81e0603"
+  },
+  "04_descriptive_analysis.qmd": {
+    "04_descriptive_analysis.html": "a4b97009"
+  },
+  "05_capm_regression.qmd": {
+    "05_capm_regression.html": "0923a486"
+  },
+  "06_cpi_macro_regression.qmd": {
+    "06_cpi_macro_regression.html": "c79125a7"
+  },
+  "references.qmd": {
+    "references.html": "55494634"
+  },
+  "appendix_data_dict.qmd": {
+    "appendix_data_dict.html": "4c460855"
+  },
+  "01_download.ipynb": {
+    "01_download.html": "9eb92424"
+  },
+  "02_clean.ipynb": {
+    "02_clean.html": "c83d8ae6"
+  },
+  "03_regression_analysis.ipynb": {
+    "03_regression_analysis.html": "5799cb78"
+  },
+  "04_capm_analysis.ipynb": {
+    "04_capm_analysis.html": "2daa4aa0"
+  }
+}

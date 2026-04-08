@@ -11,5 +11,5 @@ date: "2026-04-07"
 
 ## 联系作者
 
-- GitHub仓库：https://github.com/PYC1234/dshw-p01
-- 数据报告：https://PYC1234.github.io/dshw-p01/
+- GitHub仓库：https://github.com/PYC1234/
+- 数据报告：https://PYC1234.github.io/dshw-p02/
