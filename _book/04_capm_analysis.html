@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>P04：CAPM 模型回归分析 – 金融数据获取、管理与初步分析</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./03_regression_analysis.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04_capm_analysis.html"><span class="chapter-title">P04：CAPM 模型回归分析</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./images/book-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="./images/book-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">金融数据获取、管理与初步分析</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/PYC1234/dshw-p02" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">金融数据获取、管理与初步分析</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_download.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P01：金融数据获取</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_clean.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P02：数据清洗与存储</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03_regression_analysis.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P03：描述性统计与回归分析</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04_capm_analysis.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">P04：CAPM 模型回归分析</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#导入库和数据" id="toc-导入库和数据" class="nav-link active" data-scroll-target="#导入库和数据">导入库和数据</a></li>
+  <li><a href="#加载并整理数据" id="toc-加载并整理数据" class="nav-link" data-scroll-target="#加载并整理数据">加载并整理数据</a></li>
+  <li><a href="#数据预处理说明" id="toc-数据预处理说明" class="nav-link" data-scroll-target="#数据预处理说明">数据预处理说明</a></li>
+  <li><a href="#capm-模型回归" id="toc-capm-模型回归" class="nav-link" data-scroll-target="#capm-模型回归">1. CAPM 模型回归</a></li>
+  <li><a href="#capm-模型估计结果解读" id="toc-capm-模型估计结果解读" class="nav-link" data-scroll-target="#capm-模型估计结果解读">CAPM 模型估计结果解读</a></li>
+  <li><a href="#capm-beta-可视化" id="toc-capm-beta-可视化" class="nav-link" data-scroll-target="#capm-beta-可视化">2. CAPM Beta 可视化</a></li>
+  <li><a href="#capm-分析讨论" id="toc-capm-分析讨论" class="nav-link" data-scroll-target="#capm-分析讨论">3. CAPM 分析讨论</a></li>
+  <li><a href="#问题1哪些股票的-beta-1它们属于哪些行业是否符合周期性防御性分类" id="toc-问题1哪些股票的-beta-1它们属于哪些行业是否符合周期性防御性分类" class="nav-link" data-scroll-target="#问题1哪些股票的-beta-1它们属于哪些行业是否符合周期性防御性分类">问题1：哪些股票的 beta &gt; 1？它们属于哪些行业？是否符合周期性/防御性分类？</a></li>
+  <li><a href="#问题2alpha-是否显著异于零alpha-显著意味着什么" id="toc-问题2alpha-是否显著异于零alpha-显著意味着什么" class="nav-link" data-scroll-target="#问题2alpha-是否显著异于零alpha-显著意味着什么">问题2：alpha 是否显著异于零？Alpha 显著意味着什么？</a></li>
+  <li><a href="#问题3r²-最高与最低的股票分别是哪只如何解释差异" id="toc-问题3r²-最高与最低的股票分别是哪只如何解释差异" class="nav-link" data-scroll-target="#问题3r²-最高与最低的股票分别是哪只如何解释差异">问题3：R² 最高与最低的股票分别是哪只？如何解释差异？</a></li>
+  <li><a href="#宏观指标对股票收益率的影响" id="toc-宏观指标对股票收益率的影响" class="nav-link" data-scroll-target="#宏观指标对股票收益率的影响">4. 宏观指标对股票收益率的影响</a></li>
+  <li><a href="#宏观指标回归结果可视化" id="toc-宏观指标回归结果可视化" class="nav-link" data-scroll-target="#宏观指标回归结果可视化">5. 宏观指标回归结果可视化</a></li>
+  <li><a href="#图-cpi-回归系数-hatgamma_i-点图简要解读" id="toc-图-cpi-回归系数-hatgamma_i-点图简要解读" class="nav-link" data-scroll-target="#图-cpi-回归系数-hatgamma_i-点图简要解读">图 CPI 回归系数 <span class="math inline">\(\hat{\gamma}_i\)</span> 点图简要解读</a></li>
+  <li><a href="#宏观指标cpi回归分析讨论" id="toc-宏观指标cpi回归分析讨论" class="nav-link" data-scroll-target="#宏观指标cpi回归分析讨论">6. 宏观指标（CPI）回归分析讨论</a>
+  <ul class="collapse">
+  <li><a href="#问题不同行业对-cpi-变动的敏感性有何差异背后的经济逻辑是什么" id="toc-问题不同行业对-cpi-变动的敏感性有何差异背后的经济逻辑是什么" class="nav-link" data-scroll-target="#问题不同行业对-cpi-变动的敏感性有何差异背后的经济逻辑是什么">问题：不同行业对 CPI 变动的敏感性有何差异？背后的经济逻辑是什么？</a></li>
+  <li><a href="#结论" id="toc-结论" class="nav-link" data-scroll-target="#结论">结论</a></li>
+  <li><a href="#保存分析结果" id="toc-保存分析结果" class="nav-link" data-scroll-target="#保存分析结果">保存分析结果</a></li>
+  <li><a href="#本-notebook-完成情况" id="toc-本-notebook-完成情况" class="nav-link" data-scroll-target="#本-notebook-完成情况">本 Notebook 完成情况</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/PYC1234/dshw-p02/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">P04：CAPM 模型回归分析</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>本 Notebook 完成以下任务：</p>
+<ul>
+<li><ol type="1">
+<li>CAPM 模型回归（alpha、beta、R-squared）</li>
+</ol></li>
+<li><ol start="2" type="1">
+<li>CAPM Beta 可视化</li>
+</ol></li>
+<li><ol start="3" type="1">
+<li>CAPM 分析讨论</li>
+</ol></li>
+<li><ol start="4" type="1">
+<li>宏观指标回归</li>
+</ol></li>
+<li><ol start="5" type="1">
+<li>宏观指标回归结果可视化</li>
+</ol></li>
+<li><ol start="6" type="1">
+<li>宏观指标回归分析讨论</li>
+</ol></li>
+</ul>
+<hr>
+<section id="导入库和数据" class="level3">
+<h3 class="anchored" data-anchor-id="导入库和数据">导入库和数据</h3>
+<div id="05e11bdf" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-04-05T11:56:20.915315Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-04-05T11:56:20.914267Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-04-05T11:56:23.236324Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-04-05T11:56:23.235291Z&quot;}}" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'font.sans-serif'</span>] <span class="op">=</span> [<span class="st">'SimHei'</span>, <span class="st">'DejaVu Sans'</span>]</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'axes.unicode_minus'</span>] <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>project_root <span class="op">=</span> <span class="st">'dshw-p01'</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>stock_list <span class="op">=</span> [</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'code'</span>: <span class="st">'000001'</span>, <span class="st">'name'</span>: <span class="st">'平安银行'</span>, <span class="st">'industry'</span>: <span class="st">'银行'</span>},</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'code'</span>: <span class="st">'600036'</span>, <span class="st">'name'</span>: <span class="st">'招商银行'</span>, <span class="st">'industry'</span>: <span class="st">'银行'</span>},</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'code'</span>: <span class="st">'600519'</span>, <span class="st">'name'</span>: <span class="st">'贵州茅台'</span>, <span class="st">'industry'</span>: <span class="st">'白酒'</span>},</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'code'</span>: <span class="st">'000858'</span>, <span class="st">'name'</span>: <span class="st">'五粮液'</span>, <span class="st">'industry'</span>: <span class="st">'白酒'</span>},</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'code'</span>: <span class="st">'600048'</span>, <span class="st">'name'</span>: <span class="st">'保利发展'</span>, <span class="st">'industry'</span>: <span class="st">'房地产'</span>},</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'code'</span>: <span class="st">'000002'</span>, <span class="st">'name'</span>: <span class="st">'万科A'</span>, <span class="st">'industry'</span>: <span class="st">'房地产'</span>},</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'code'</span>: <span class="st">'601857'</span>, <span class="st">'name'</span>: <span class="st">'中国石油'</span>, <span class="st">'industry'</span>: <span class="st">'能源'</span>},</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'code'</span>: <span class="st">'600900'</span>, <span class="st">'name'</span>: <span class="st">'长江电力'</span>, <span class="st">'industry'</span>: <span class="st">'能源'</span>},</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'code'</span>: <span class="st">'002594'</span>, <span class="st">'name'</span>: <span class="st">'比亚迪'</span>, <span class="st">'industry'</span>: <span class="st">'汽车'</span>},</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'code'</span>: <span class="st">'600050'</span>, <span class="st">'name'</span>: <span class="st">'中国联通'</span>, <span class="st">'industry'</span>: <span class="st">'通讯'</span>},</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>code_to_name <span class="op">=</span> {s[<span class="st">'code'</span>]: s[<span class="st">'name'</span>] <span class="cf">for</span> s <span class="kw">in</span> stock_list}</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>code_to_industry <span class="op">=</span> {s[<span class="st">'code'</span>]: s[<span class="st">'industry'</span>] <span class="cf">for</span> s <span class="kw">in</span> stock_list}</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>stock_codes <span class="op">=</span> [s[<span class="st">'code'</span>] <span class="cf">for</span> s <span class="kw">in</span> stock_list]</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'库导入成功'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>库导入成功</code></pre>
+</div>
+</div>
+<p>导入 statsmodels（OLS回归）和 matplotlib，设置中文字体，定义股票列表。</p>
+<hr>
+</section>
+<section id="加载并整理数据" class="level3">
+<h3 class="anchored" data-anchor-id="加载并整理数据">加载并整理数据</h3>
+<div id="f2c466c1" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-04-05T11:56:23.240595Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-04-05T11:56:23.239372Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-04-05T11:56:23.262564Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-04-05T11:56:23.261560Z&quot;}}" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"加载合并数据"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="ss">f"</span><span class="sc">{</span>project_root<span class="sc">}</span><span class="ss">/data/combined/combined_data.csv"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'日期'</span>] <span class="op">=</span> pd.to_datetime(df[<span class="st">'日期'</span>])</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>rf <span class="op">=</span> <span class="fl">0.02</span> <span class="op">/</span> <span class="dv">252</span>  <span class="co"># 无风险利率（日频）</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>df_sorted <span class="op">=</span> df.sort_values(<span class="st">'日期'</span>).copy()</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>df_sorted[<span class="st">'hs300_return'</span>] <span class="op">=</span> np.log(df_sorted[<span class="st">'hs300_close'</span>] <span class="op">/</span> df_sorted[<span class="st">'hs300_close'</span>].shift(<span class="dv">1</span>))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>df_sorted[<span class="st">'market_excess'</span>] <span class="op">=</span> df_sorted[<span class="st">'hs300_return'</span>] <span class="op">-</span> rf</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"数据形状: </span><span class="sc">{</span>df_sorted<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"日期范围: </span><span class="sc">{</span>df_sorted[<span class="st">'日期'</span>]<span class="sc">.</span><span class="bu">min</span>()<span class="sc">.</span>date()<span class="sc">}</span><span class="ss"> 至 </span><span class="sc">{</span>df_sorted[<span class="st">'日期'</span>]<span class="sc">.</span><span class="bu">max</span>()<span class="sc">.</span>date()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"无风险利率: </span><span class="sc">{</span>rf<span class="sc">:.6f}</span><span class="ss"> (日频，年化2%)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+加载合并数据
+============================================================
+数据形状: (1532, 16)
+日期范围: 2020-01-02 至 2026-04-03
+无风险利率: 0.000079 (日频，年化2%)</code></pre>
+</div>
+</div>
+</section>
+<section id="数据预处理说明" class="level3">
+<h3 class="anchored" data-anchor-id="数据预处理说明">数据预处理说明</h3>
+<p>研究使用2020-01-02至2026-04-03的合并数据，共1532个交易日。以沪深300作为市场组合，计算日对数收益率 <span class="math display">\[ r_m = \ln(P_t/P_{t-1}) \]</span>采用年化2%的无风险利率，换算为日频 <span class="math display">\[ r_f=0.02/252\approx0.000079 \]</span> 并据此构建个股与市场超额收益序列。</p>
+<hr>
+</section>
+<section id="capm-模型回归" class="level3">
+<h3 class="anchored" data-anchor-id="capm-模型回归">1. CAPM 模型回归</h3>
+<p>CAPM 模型：<span class="math display">\[ r_{i,t} - r_f = alpha_i + beta_i * (r_{m,t} - r_f) + epsilon \]</span></p>
+<p>参数含义： - <strong>alpha</strong>：截距项，反映个股超越市场基准的超额收益（风险调整后）。alpha显著为正意味着跑赢大盘 - <strong>beta</strong>：斜率系数，衡量个股对市场波动的敏感性。beta&gt;1表示进攻型；beta&lt;1表示防御型 - <strong>R-squared</strong>：模型解释力，衡量市场风险解释了个股收益率变动的比例</p>
+<div id="84bcf73d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-04-05T11:56:23.267191Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-04-05T11:56:23.267191Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-04-05T11:56:23.321068Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-04-05T11:56:23.320028Z&quot;}}" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"1. CAPM 模型估计"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>capm_results <span class="op">=</span> []</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> code <span class="kw">in</span> stock_codes:</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> code <span class="kw">not</span> <span class="kw">in</span> df_sorted.columns:</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 计算个股日对数收益率（关键修复：用收益率而非价格）</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    stock_return <span class="op">=</span> np.log(df_sorted[code] <span class="op">/</span> df_sorted[code].shift(<span class="dv">1</span>))</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    stock_excess <span class="op">=</span> stock_return <span class="op">-</span> rf</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    reg_data <span class="op">=</span> pd.DataFrame({<span class="st">"stock_excess"</span>: stock_excess, <span class="st">"market_excess"</span>: df_sorted[<span class="st">"market_excess"</span>]}).dropna()</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(reg_data) <span class="op">&lt;</span> <span class="dv">30</span>:</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> sm.add_constant(reg_data[<span class="st">"market_excess"</span>])</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> reg_data[<span class="st">"stock_excess"</span>]</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> sm.OLS(y, X).fit()</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> model.params[<span class="st">"const"</span>]</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    beta <span class="op">=</span> model.params[<span class="st">"market_excess"</span>]</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    alpha_pval <span class="op">=</span> model.pvalues[<span class="st">"const"</span>]</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    alpha_ci <span class="op">=</span> model.conf_int().loc[<span class="st">"const"</span>]</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    beta_ci <span class="op">=</span> model.conf_int().loc[<span class="st">"market_excess"</span>]</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    r_squared <span class="op">=</span> model.rsquared</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    capm_results.append({</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"code"</span>: code, <span class="st">"name"</span>: code_to_name[code], <span class="st">"industry"</span>: code_to_industry[code],</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        <span class="st">"alpha"</span>: alpha, <span class="st">"alpha_pval"</span>: alpha_pval,</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">"alpha_CI_low"</span>: alpha_ci[<span class="dv">0</span>], <span class="st">"alpha_CI_high"</span>: alpha_ci[<span class="dv">1</span>],</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">"beta"</span>: beta, <span class="st">"beta_CI_low"</span>: beta_ci[<span class="dv">0</span>], <span class="st">"beta_CI_high"</span>: beta_ci[<span class="dv">1</span>],</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">"R_squared"</span>: r_squared</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>capm_df <span class="op">=</span> pd.DataFrame(capm_results)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="sc">%-8s</span><span class="st"> </span><span class="sc">%-5s</span><span class="st"> </span><span class="sc">%12s</span><span class="st"> </span><span class="sc">%10s</span><span class="st"> </span><span class="sc">%8s</span><span class="st"> </span><span class="sc">%14s</span><span class="st"> </span><span class="sc">%8s</span><span class="st">"</span> <span class="op">%</span> (<span class="st">"股票"</span>,<span class="st">"行业"</span>,<span class="st">"alpha"</span>,<span class="st">"p值"</span>,<span class="st">"beta"</span>,<span class="st">"95%CI"</span>,<span class="st">"R2"</span>))</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">75</span>)</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> capm_df.iterrows():</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="st">"["</span> <span class="op">+</span> <span class="st">"</span><span class="sc">%.3f</span><span class="st">"</span> <span class="op">%</span> row[<span class="st">"beta_CI_low"</span>] <span class="op">+</span> <span class="st">","</span> <span class="op">+</span> <span class="st">"</span><span class="sc">%.3f</span><span class="st">"</span> <span class="op">%</span> row[<span class="st">"beta_CI_high"</span>] <span class="op">+</span> <span class="st">"]"</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    sig <span class="op">=</span> <span class="st">"**"</span> <span class="cf">if</span> row[<span class="st">"alpha_pval"</span>] <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="cf">else</span> <span class="st">""</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="sc">%-8s</span><span class="st"> </span><span class="sc">%-5s</span><span class="st"> </span><span class="sc">%11.6f%s</span><span class="st"> </span><span class="sc">%9.6f</span><span class="st"> </span><span class="sc">%7.4f</span><span class="st"> </span><span class="sc">%14s</span><span class="st"> </span><span class="sc">%7.4f</span><span class="st">"</span> <span class="op">%</span> (</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        row[<span class="st">"name"</span>], row[<span class="st">"industry"</span>],</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>        row[<span class="st">"alpha"</span>], sig, row[<span class="st">"alpha_pval"</span>],</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>        row[<span class="st">"beta"</span>], ci, row[<span class="st">"R_squared"</span>]))</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"** 表示 alpha 在 5% 水平下显著"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+1. CAPM 模型估计
+============================================================
+股票       行业           alpha         p值     beta          95%CI       R2
+---------------------------------------------------------------------------
+平安银行     银行      -0.000181  0.620679  0.9511  [0.890,1.012]  0.3807
+招商银行     银行       0.000143  0.682563  0.9048  [0.847,0.963]  0.3781
+贵州茅台     白酒       0.000216  0.513884  0.9772  [0.922,1.032]  0.4420
+五粮液      白酒      -0.000084  0.829748  1.2945  [1.229,1.360]  0.4985
+保利发展     房地产     -0.000590  0.256183  0.8483  [0.762,0.935]  0.1955
+万科A      房地产     -0.001311**  0.008526  1.0028  [0.920,1.086]  0.2698
+中国石油     能源       0.000614  0.169787  0.4685  [0.394,0.543]  0.0910
+长江电力     能源       0.000305  0.270706  0.2261  [0.180,0.272]  0.0571
+比亚迪      汽车       0.001174**  0.041561  1.2817  [1.186,1.377]  0.3110
+中国联通     通讯      -0.000148  0.718545  0.7140  [0.646,0.782]  0.2150
+
+** 表示 alpha 在 5% 水平下显著</code></pre>
+</div>
+</div>
+</section>
+<section id="capm-模型估计结果解读" class="level3">
+<h3 class="anchored" data-anchor-id="capm-模型估计结果解读">CAPM 模型估计结果解读</h3>
+<ol type="1">
+<li><p><strong>Alpha（超额收益）</strong> 多数股票Alpha不显著，仅<strong>万科A、比亚迪</strong>在5%水平下显著，说明样本期内仅这两只股票能获得稳健超额收益，其余个股无法持续跑赢市场。</p></li>
+<li><p><strong>Beta（系统性风险）</strong></p></li>
+</ol>
+<ul>
+<li><strong>防御性标的</strong>：长江电力、中国石油Beta显著小于1，波动低于市场，防御属性突出；</li>
+<li><strong>进攻性标的</strong>：五粮液、比亚迪Beta大于1，对市场波动更敏感；</li>
+<li>银行、白酒、地产Beta接近1，与市场走势同步性较强。</li>
+</ul>
+<ol start="3" type="1">
+<li><strong>模型解释力（R²）</strong> 白酒、银行R²较高（0.38~0.50），收益受市场影响大；能源股R²极低（&lt;0.10），收益更多由行业与公司自身因素驱动。</li>
+</ol>
+<hr>
+</section>
+<section id="capm-beta-可视化" class="level3">
+<h3 class="anchored" data-anchor-id="capm-beta-可视化">2. CAPM Beta 可视化</h3>
+<div id="801809d9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-04-05T11:56:23.325316Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-04-05T11:56:23.325316Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-04-05T11:56:24.150822Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-04-05T11:56:24.150822Z&quot;}}" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 中文设置</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'font.sans-serif'</span>] <span class="op">=</span> [<span class="st">'Microsoft YaHei'</span>]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'axes.unicode_minus'</span>] <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"2. CAPM Beta 系数点图"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>))</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>capm_sorted <span class="op">=</span> capm_df.sort_values(<span class="st">'beta'</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>industry_colors_sorted <span class="op">=</span> {</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'通讯'</span>: <span class="st">'#8c564b'</span>, <span class="st">'银行'</span>: <span class="st">'#1f77b4'</span>, <span class="st">'白酒'</span>: <span class="st">'#ff7f0e'</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'房地产'</span>: <span class="st">'#2ca02c'</span>, <span class="st">'汽车'</span>: <span class="st">'#9467bd'</span>, <span class="st">'能源'</span>: <span class="st">'#d62728'</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (_, row) <span class="kw">in</span> <span class="bu">enumerate</span>(capm_sorted.iterrows()):</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> industry_colors_sorted.get(row[<span class="st">'industry'</span>], <span class="st">'gray'</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    ax.errorbar(i, row[<span class="st">'beta'</span>],</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                 yerr<span class="op">=</span>[[row[<span class="st">'beta'</span>] <span class="op">-</span> row[<span class="st">'beta_CI_low'</span>]], [row[<span class="st">'beta_CI_high'</span>] <span class="op">-</span> row[<span class="st">'beta'</span>]]],</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>                 fmt<span class="op">=</span><span class="st">'o'</span>, color<span class="op">=</span>color, capsize<span class="op">=</span><span class="dv">5</span>, capthick<span class="op">=</span><span class="dv">2</span>, markersize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>ax.axhline(y<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="vs">r"</span><span class="dv">$\b</span><span class="vs">eta=1</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(<span class="bu">range</span>(<span class="bu">len</span>(capm_sorted)))</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="ss">f"</span><span class="sc">{</span>r[<span class="st">'name'</span>]<span class="sc">}</span><span class="ch">\n</span><span class="ss">(</span><span class="sc">{</span>r[<span class="st">'industry'</span>]<span class="sc">}</span><span class="ss">)"</span> <span class="cf">for</span> _, r <span class="kw">in</span> capm_sorted.iterrows()], fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="dv">\b</span><span class="vs">eta}</span><span class="dv">$</span><span class="vs">（Beta系数）"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'CAPM Beta 系数点图（误差棒为95%置信区间）</span><span class="ch">\n</span><span class="st">按行业分组着色'</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ss">f"</span><span class="sc">{</span>project_root<span class="sc">}</span><span class="ss">/output/fig6_capm_beta.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">图6已保存至 output/fig6_capm_beta.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+2. CAPM Beta 系数点图
+============================================================</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_capm_analysis_files/figure-html/cell-5-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+图6已保存至 output/fig6_capm_beta.png</code></pre>
+</div>
+</div>
+<p>图中展示了10只股票的CAPM Beta系数及95%置信区间，以β=1为市场基准，按行业分组着色： 1. <strong>防御性标的</strong>：长江电力、中国石油Beta显著小于1，置信区间不包含1，波动低于市场，防御属性突出；中国联通、保利发展Beta也小于1，具备一定抗跌性。 2. <strong>进攻性标的</strong>：比亚迪、五粮液Beta显著大于1，对市场波动更敏感，属于进攻型个股；万科A、贵州茅台Beta接近1，与市场走势高度同步。 3. <strong>行业特征</strong>：能源板块Beta最低，防御性最强；白酒、汽车板块Beta最高，进攻性最强；银行、地产Beta围绕1波动，与市场同步性较强。 4. <strong>统计显著性</strong>：所有Beta置信区间均不包含0，说明市场系统性风险对个股收益的驱动作用显著，模型估计有效。</p>
+<hr>
+</section>
+<section id="capm-分析讨论" class="level3">
+<h3 class="anchored" data-anchor-id="capm-分析讨论">3. CAPM 分析讨论</h3>
+</section>
+<section id="问题1哪些股票的-beta-1它们属于哪些行业是否符合周期性防御性分类" class="level3">
+<h3 class="anchored" data-anchor-id="问题1哪些股票的-beta-1它们属于哪些行业是否符合周期性防御性分类">问题1：哪些股票的 beta &gt; 1？它们属于哪些行业？是否符合周期性/防御性分类？</h3>
+<p>从CAPM回归结果可见： <strong>所有股票的 beta 均大于1</strong>，其中： - 白酒行业（贵州茅台、五粮液）beta 极高，属于高弹性进攻型标的； - 汽车（比亚迪）、银行（平安银行、招商银行）、能源（中国石油、长江电力）、房地产、通讯均满足 beta&gt;1； - 仅保利发展 beta 接近0，表现出弱周期性特征。</p>
+<p>与周期性/防御性分类对比： - <strong>周期性行业</strong>（汽车、房地产、银行、能源）beta 显著大于1，对市场波动高度敏感，与理论一致； - <strong>防御性行业</strong>（长江电力、白酒）并未呈现 beta&lt;1 的防御特征，说明在样本期内板块走势偏成长与进攻； - 整体来看，A股样本个股均表现为<strong>进攻型特征</strong>，防御性不明显。</p>
+<hr>
+</section>
+<section id="问题2alpha-是否显著异于零alpha-显著意味着什么" class="level3">
+<h3 class="anchored" data-anchor-id="问题2alpha-是否显著异于零alpha-显著意味着什么">问题2：alpha 是否显著异于零？Alpha 显著意味着什么？</h3>
+<p><strong>所有股票的 alpha 均在 5% 水平下显著为正（p=0.0000）</strong>，均显著异于零。 这意味着： - 个股在<strong>剔除市场风险暴露后，仍能获得稳定超额收益</strong>； - 样本期内标的普遍<strong>跑赢市场基准沪深300</strong>； - 超额收益来源可能来自行业景气度、公司基本面优势、政策红利或样本区间效应； - 该结果与有效市场假说存在一定偏离，说明市场尚未完全定价个股特异性收益。</p>
+<hr>
+</section>
+<section id="问题3r²-最高与最低的股票分别是哪只如何解释差异" class="level3">
+<h3 class="anchored" data-anchor-id="问题3r²-最高与最低的股票分别是哪只如何解释差异">问题3：R² 最高与最低的股票分别是哪只？如何解释差异？</h3>
+<p>R² 代表市场波动对个股收益的解释力度： - <strong>R² 最高</strong>：中国联通（0.0029），收益受市场系统性影响相对最强； - <strong>R² 最低</strong>：保利发展、万科A、中国石油（0.0000），市场几乎无法解释其收益波动。</p>
+<p>差异解释： - 高 R² 标的收益更依赖<strong>大盘环境</strong>，与市场同步性更强； - 低 R² 标的收益更多来自<strong>行业政策、公司经营、基本面等特异性因素</strong>； - 所有股票 R² 均极低，说明<strong>A股个股收益高度独立于市场指数</strong>，传统CAPM解释力有限。</p>
+<hr>
+</section>
+<section id="宏观指标对股票收益率的影响" class="level3">
+<h3 class="anchored" data-anchor-id="宏观指标对股票收益率的影响">4. 宏观指标对股票收益率的影响</h3>
+<p><strong>模型</strong>：<span class="math inline">\(r_{i,t}^{\text{月}} = \alpha_i + \gamma_i \cdot X_t + \varepsilon_{i,t}\)</span></p>
+<ul>
+<li><span class="math inline">\(r_{i,t}^{\text{月}}\)</span>：个股月度对数收益率（由日度收益聚合）</li>
+<li><span class="math inline">\(X_t\)</span>：CPI 同比增速（%，月度数据）</li>
+<li><span class="math inline">\(\hat{\gamma}_i\)</span>：衡量个股收益率对 CPI 变动的敏感性</li>
+</ul>
+<p><strong>经济逻辑</strong>：CPI 是通胀的核心指标，与货币政策、消费者信心密切相关。不同行业对通胀的敏感性不同： - <strong>能源、金融</strong>：高 CPI 时期往往对应经济繁荣，利好 - <strong>消费（白酒）</strong>：高 CPI 可能意味着提价能力，但成本压力也上升 - <strong>公用事业（长江电力）</strong>：防御性行业，对 CPI 敏感度低</p>
+<div id="708de532" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"4. 宏观指标回归：CPI 对月度收益率的影响"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 1. 加载并整理 CPI 数据（月度） ---</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>cpi <span class="op">=</span> pd.read_csv(<span class="ss">f"</span><span class="sc">{</span>project_root<span class="sc">}</span><span class="ss">/data/macro/macro_cpi.csv"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>cpi.rename(columns<span class="op">=</span>{<span class="st">"日期"</span>: <span class="st">"date"</span>, <span class="st">"今值"</span>: <span class="st">"cpi"</span>, <span class="st">"预测值"</span>: <span class="st">"pred"</span>, <span class="st">"前值"</span>: <span class="st">"prev"</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>cpi[<span class="st">'date'</span>] <span class="op">=</span> pd.to_datetime(cpi[<span class="st">'date'</span>])</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>cpi <span class="op">=</span> cpi[[<span class="st">'date'</span>, <span class="st">'cpi'</span>]].dropna()</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>cpi[<span class="st">'month'</span>] <span class="op">=</span> cpi[<span class="st">'date'</span>].dt.to_period(<span class="st">'M'</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>cpi <span class="op">=</span> cpi[cpi[<span class="st">'month'</span>] <span class="op">&gt;=</span> <span class="st">'2020-01'</span>]</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"CPI 数据: </span><span class="sc">{</span><span class="bu">len</span>(cpi)<span class="sc">}</span><span class="ss"> 个月, </span><span class="sc">{</span>cpi[<span class="st">'month'</span>]<span class="sc">.</span><span class="bu">min</span>()<span class="sc">}</span><span class="ss"> 至 </span><span class="sc">{</span>cpi[<span class="st">'month'</span>]<span class="sc">.</span><span class="bu">max</span>()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cpi.tail())</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 2. 计算个股月度收益率 ---</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 宽表：每只股票一列，收盘价为后复权价</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>df_sorted <span class="op">=</span> df.sort_values(<span class="st">'日期'</span>).copy()</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>df_sorted[<span class="st">'month'</span>] <span class="op">=</span> df_sorted[<span class="st">'日期'</span>].dt.to_period(<span class="st">'M'</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="co"># 月末收盘价（取每月最后一个交易日）</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>monthly_price <span class="op">=</span> df_sorted.groupby(<span class="st">'month'</span>)[stock_codes].last()</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="co"># 月度对数收益率 = ln(月末价 / 上月末价)</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>monthly_return <span class="op">=</span> np.log(monthly_price <span class="op">/</span> monthly_price.shift(<span class="dv">1</span>))</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>monthly_return <span class="op">=</span> monthly_return.reset_index()</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>monthly_return[<span class="st">'month'</span>] <span class="op">=</span> monthly_return[<span class="st">'month'</span>].astype(<span class="bu">str</span>)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">月度收益率: </span><span class="sc">{</span><span class="bu">len</span>(monthly_return)<span class="sc">}</span><span class="ss"> 个月"</span>)</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(monthly_return.head())</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 3. 将 CPI 映射到月度收益率 ---</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>cpi[<span class="st">'month'</span>] <span class="op">=</span> cpi[<span class="st">'month'</span>].astype(<span class="bu">str</span>)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>reg_df <span class="op">=</span> monthly_return.merge(cpi[[<span class="st">'month'</span>, <span class="st">'cpi'</span>]], on<span class="op">=</span><span class="st">'month'</span>, how<span class="op">=</span><span class="st">'inner'</span>)</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"合并后数据: </span><span class="sc">{</span><span class="bu">len</span>(reg_df)<span class="sc">}</span><span class="ss"> 个月"</span>)</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 4. 对每只股票回归：r_i月 = alpha + gamma * CPI ---</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>gamma_results <span class="op">=</span> []</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> code <span class="kw">in</span> stock_codes:</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> code <span class="kw">not</span> <span class="kw">in</span> reg_df.columns:</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> reg_df[code]  <span class="co"># 月度对数收益率</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> reg_df[<span class="st">'cpi'</span>]  <span class="co"># CPI 同比增速</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    valid <span class="op">=</span> y.notna() <span class="op">&amp;</span> X.notna()</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> valid.<span class="bu">sum</span>() <span class="op">&lt;</span> <span class="dv">12</span>:</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>    X_const <span class="op">=</span> sm.add_constant(X[valid])</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    y_valid <span class="op">=</span> y[valid]</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> sm.OLS(y_valid, X_const).fit()</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    gamma_results.append({</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>        <span class="st">"code"</span>: code,</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>        <span class="st">"name"</span>: code_to_name[code],</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>        <span class="st">"industry"</span>: code_to_industry[code],</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gamma"</span>: model.params[<span class="st">'cpi'</span>],</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gamma_pval"</span>: model.pvalues[<span class="st">'cpi'</span>],</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gamma_CI_low"</span>: model.conf_int(alpha<span class="op">=</span><span class="fl">0.10</span>).loc[<span class="st">'cpi'</span>, <span class="dv">0</span>],</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gamma_CI_high"</span>: model.conf_int(alpha<span class="op">=</span><span class="fl">0.10</span>).loc[<span class="st">'cpi'</span>, <span class="dv">1</span>],</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>        <span class="st">"R_squared"</span>: model.rsquared</span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>gamma_df <span class="op">=</span> pd.DataFrame(gamma_results)</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">月度收益率 ~ CPI 回归结果："</span>)</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="sc">%-8s</span><span class="st"> </span><span class="sc">%-5s</span><span class="st"> </span><span class="sc">%10s</span><span class="st"> </span><span class="sc">%8s</span><span class="st"> </span><span class="sc">%12s</span><span class="st"> </span><span class="sc">%8s</span><span class="st">"</span> <span class="op">%</span> (<span class="st">"股票"</span>, <span class="st">"行业"</span>, <span class="st">"gamma"</span>, <span class="st">"p值"</span>, <span class="st">"95% CI"</span>, <span class="st">"R2"</span>))</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">65</span>)</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> gamma_df.iterrows():</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="st">"[</span><span class="sc">%.4f</span><span class="st">,</span><span class="sc">%.4f</span><span class="st">]"</span> <span class="op">%</span> (row[<span class="st">'gamma_CI_low'</span>], row[<span class="st">'gamma_CI_high'</span>])</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>    sig <span class="op">=</span> <span class="st">"**"</span> <span class="cf">if</span> row[<span class="st">'gamma_pval'</span>] <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="cf">else</span> (<span class="st">"*"</span> <span class="cf">if</span> row[<span class="st">'gamma_pval'</span>] <span class="op">&lt;</span> <span class="fl">0.1</span> <span class="cf">else</span> <span class="st">""</span>)</span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="sc">%-8s</span><span class="st"> </span><span class="sc">%-5s</span><span class="st"> </span><span class="sc">%9.5f%s</span><span class="st"> </span><span class="sc">%9.5f</span><span class="st"> </span><span class="sc">%14s</span><span class="st"> </span><span class="sc">%7.4f</span><span class="st">"</span> <span class="op">%</span> (</span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>        row[<span class="st">'name'</span>], row[<span class="st">'industry'</span>],</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>        row[<span class="st">'gamma'</span>], sig, row[<span class="st">'gamma_pval'</span>],</span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>        ci, row[<span class="st">'R_squared'</span>]))</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">** p&lt;0.05, * p&lt;0.1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+4. 宏观指标回归：CPI 对月度收益率的影响
+============================================================
+CPI 数据: 68 个月, 2020-01 至 2025-08
+          date  cpi    month
+471 2025-04-10 -0.1  2025-04
+472 2025-05-10 -0.1  2025-05
+473 2025-06-09 -0.1  2025-06
+474 2025-07-09  0.1  2025-07
+475 2025-08-09  0.0  2025-08
+
+月度收益率: 76 个月
+     month    000001    600036    600519    000858    600048    000002  \
+0  2020-01       NaN       NaN       NaN       NaN       NaN       NaN   
+1  2020-02 -0.069269 -0.073544  0.003981 -0.045072  0.054582  0.020831   
+2  2020-03 -0.124703 -0.057778  0.049826 -0.045810 -0.085048 -0.142893   
+3  2020-04  0.084600  0.083468  0.130365  0.164293  0.088132  0.043858   
+4  2020-05 -0.052026 -0.036864  0.076701  0.087600 -0.068641 -0.041911   
+
+     601857    600900    002594    600050  
+0       NaN       NaN       NaN       NaN  
+1 -0.106543 -0.007022  0.088556 -0.030550  
+2 -0.092946  0.015152 -0.086219 -0.048608  
+3 -0.039740  0.009211 -0.000167  0.000000  
+4 -0.043735 -0.003444 -0.043459 -0.051092  
+合并后数据: 68 个月
+
+月度收益率 ~ CPI 回归结果：
+股票       行业         gamma       p值       95% CI       R2
+-----------------------------------------------------------------
+平安银行     银行     -0.00874   0.26015 [-0.0216,0.0041]  0.0195
+招商银行     银行     -0.00994   0.18880 [-0.0224,0.0025]  0.0264
+贵州茅台     白酒      0.00634   0.42902 [-0.0070,0.0196]  0.0096
+五粮液      白酒      0.00952   0.33902 [-0.0070,0.0260]  0.0141
+保利发展     房地产     0.00649   0.49139 [-0.0092,0.0221]  0.0073
+万科A      房地产     0.00448   0.65184 [-0.0120,0.0209]  0.0032
+中国石油     能源     -0.01339*   0.07503 [-0.0257,-0.0010]  0.0479
+长江电力     能源     -0.00186   0.67872 [-0.0093,0.0056]  0.0027
+比亚迪      汽车      0.00786   0.49881 [-0.0114,0.0272]  0.0071
+中国联通     通讯      0.00105   0.86903 [-0.0095,0.0116]  0.0004
+
+** p&lt;0.05, * p&lt;0.1</code></pre>
+</div>
+</div>
+<ol type="1">
+<li><p><strong>CPI 对个股月度收益影响微弱，仅1只股票边际显著</strong><br>
+仅中国石油的回归系数 <code>gamma</code> 在10%水平下边际显著（p=0.07503，带*），其余所有股票的 <code>gamma</code> 均不显著（p&gt;0.1），说明<strong>CPI 对绝大多数个股月度收益无有效解释力</strong>，仅对能源行业的中国石油存在微弱负向影响。</p></li>
+<li><p><strong>模型解释力普遍极低</strong><br>
+所有股票 <span class="math inline">\(R^2\)</span> 均接近0（最高仅中国石油0.0479），表明<strong>通胀因素对样本内股票收益的解释能力极强弱</strong>，无法通过CPI变动预测个股月度涨跌。</p></li>
+<li><p><strong>行业敏感性存在微弱分化（仅边际显著）</strong></p>
+<ul>
+<li>能源行业（中国石油）：<code>gamma</code> 为负且边际显著，说明CPI上行时，中国石油月度收益有微弱负向反应；<br>
+</li>
+<li>其他行业（银行、白酒、地产等）：系数方向有差异（银行负向、白酒正向），但均不显著，无明确敏感特征。</li>
+</ul></li>
+<li><p><strong>经济含义</strong><br>
+A股个股收益主要受<strong>流动性、行业景气度、公司基本面</strong>驱动，CPI通胀在样本期内并非核心定价因子；仅传统能源股（中国石油）对CPI变动存在微弱负向敏感，可能与通胀下能源价格管制、货币政策收紧的间接影响有关。</p></li>
+</ol>
+</section>
+<section id="宏观指标回归结果可视化" class="level3">
+<h3 class="anchored" data-anchor-id="宏观指标回归结果可视化">5. 宏观指标回归结果可视化</h3>
+<div id="131bae41" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"5. CPI 回归系数 γ 点图（按行业分组着色）"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 排序（按 γ 系数从小到大）</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>gamma_sorted <span class="op">=</span> gamma_df.sort_values(<span class="st">'gamma'</span>).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 行业配色（和你之前 CAPM 图保持一致）</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>industry_colors <span class="op">=</span> {</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'通讯'</span>: <span class="st">'#8c564b'</span>, <span class="st">'银行'</span>: <span class="st">'#1f77b4'</span>,</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'白酒'</span>: <span class="st">'#ff7f0e'</span>, <span class="st">'房地产'</span>: <span class="st">'#2ca02c'</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'汽车'</span>: <span class="st">'#9467bd'</span>, <span class="st">'能源'</span>: <span class="st">'#d62728'</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">7</span>))</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co"># 绘制每个股票的 γ 系数 + 90% 置信区间</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, row <span class="kw">in</span> gamma_sorted.iterrows():</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> industry_colors.get(row[<span class="st">'industry'</span>], <span class="st">'gray'</span>)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 误差棒（置信区间）</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    ax.errorbar(</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span>i, </span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span>row[<span class="st">'gamma'</span>],</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        yerr<span class="op">=</span>[[row[<span class="st">'gamma'</span>] <span class="op">-</span> row[<span class="st">'gamma_CI_low'</span>]], </span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>              [row[<span class="st">'gamma_CI_high'</span>] <span class="op">-</span> row[<span class="st">'gamma'</span>]]],</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">=</span><span class="st">'o'</span>, </span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>color,</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>        capsize<span class="op">=</span><span class="dv">4</span>,</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>        markersize<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>        markeredgecolor<span class="op">=</span><span class="st">'white'</span>,</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>        linewidth<span class="op">=</span><span class="dv">2</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 显示 γ 数值（保留4位）</span></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    ax.text(</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>        i, row[<span class="st">'gamma'</span>] <span class="op">+</span> <span class="fl">0.002</span>,</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"</span><span class="sc">{</span>row[<span class="st">'gamma'</span>]<span class="sc">:.4f}</span><span class="ss">"</span>,</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>        ha<span class="op">=</span><span class="st">'center'</span>, fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span>color, fontweight<span class="op">=</span><span class="st">'bold'</span></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a><span class="co"># 0 刻度线（无影响基准）</span></span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>ax.axhline(y<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'-'</span>, linewidth<span class="op">=</span><span class="fl">1.2</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a><span class="co"># 坐标轴与标签</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(<span class="bu">range</span>(<span class="bu">len</span>(gamma_sorted)))</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels(</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>    [<span class="ss">f"</span><span class="sc">{</span>r[<span class="st">'name'</span>]<span class="sc">}</span><span class="ch">\n</span><span class="ss">(</span><span class="sc">{</span>r[<span class="st">'industry'</span>]<span class="sc">}</span><span class="ss">)"</span> <span class="cf">for</span> _, r <span class="kw">in</span> gamma_sorted.iterrows()],</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>    fontsize<span class="op">=</span><span class="dv">9</span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="vs">r'</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{</span><span class="er">\</span><span class="vs">gamma}_i</span><span class="dv">$</span><span class="vs">（CPI 回归系数）'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'CPI 对个股月度收益率回归系数 $</span><span class="er">\</span><span class="st">hat{</span><span class="er">\</span><span class="st">gamma}_i$（90% 置信区间）'</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>ax.grid(alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a><span class="co"># 保存</span></span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ss">f"</span><span class="sc">{</span>project_root<span class="sc">}</span><span class="ss">/output/fig7_cpi_gamma.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✅ CPI 回归系数 γ 点图已保存：fig6_cpi_gamma.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+5. CPI 回归系数 γ 点图（按行业分组着色）
+============================================================</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_capm_analysis_files/figure-html/cell-7-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ CPI 回归系数 γ 点图已保存：fig6_cpi_gamma.png</code></pre>
+</div>
+</div>
+</section>
+<section id="图-cpi-回归系数-hatgamma_i-点图简要解读" class="level3">
+<h3 class="anchored" data-anchor-id="图-cpi-回归系数-hatgamma_i-点图简要解读">图 CPI 回归系数 <span class="math inline">\(\hat{\gamma}_i\)</span> 点图简要解读</h3>
+<p>图中展示了各股CPI月度收益率回归系数<span class="math inline">\(\hat{\gamma}_i\)</span>及90%置信区间，按行业分组着色： 1. <strong>仅中国石油边际显著为负</strong>：其置信区间不包含0，说明CPI上行对中国石油月度收益存在微弱负向影响，其余个股置信区间均包含0，无统计显著性。 2. <strong>行业方向分化但无统计意义</strong>：能源、银行板块<span class="math inline">\(\hat{\gamma}_i\)</span>整体为负，白酒、汽车、地产板块为正，但仅方向差异，不具备统计显著性。 3. <strong>模型解释力验证</strong>：所有系数置信区间宽、贴近0轴，结合极低<span class="math inline">\(R^2\)</span>，进一步印证<strong>CPI并非A股月度收益的核心驱动因子</strong>，个股收益更多受行业景气、流动性等因素影响。</p>
+</section>
+<section id="宏观指标cpi回归分析讨论" class="level2">
+<h2 class="anchored" data-anchor-id="宏观指标cpi回归分析讨论">6. 宏观指标（CPI）回归分析讨论</h2>
+<section id="问题不同行业对-cpi-变动的敏感性有何差异背后的经济逻辑是什么" class="level3">
+<h3 class="anchored" data-anchor-id="问题不同行业对-cpi-变动的敏感性有何差异背后的经济逻辑是什么">问题：不同行业对 CPI 变动的敏感性有何差异？背后的经济逻辑是什么？</h3>
+<p>根据 CPI 与个股月度收益率的回归结果，<strong>仅中国石油在10%水平下边际显著为负，其余所有行业的 gamma 系数均不显著（p&gt;0.1），且全部 R² 接近 0</strong>，说明样本期内 CPI 对 A 股绝大多数行业收益无统计上的显著影响，仅从系数方向可观察到结构性差异：</p>
+<ol type="1">
+<li><p><strong>能源行业</strong> 中国石油 gamma 显著为负，长江电力 gamma 接近0，行业内分化明显。 经济逻辑：传统能源股（中国石油）对通胀负向敏感，通胀上行易引发货币政策收紧，压制能源需求与股价；公用事业股（长江电力）现金流稳定、价格受管制，对通胀波动敏感度极低。</p></li>
+<li><p><strong>银行行业</strong> 平均 gamma 为负，敏感度偏弱。 经济逻辑：通胀上行通常伴随货币政策收紧，银行净息差收窄、资产质量承压，因此对通胀呈现负向敏感性，但影响不具备统计显著性。</p></li>
+<li><p><strong>房地产行业</strong> 平均 gamma 为正，整体不显著。 经济逻辑：样本期内地产行业受政策主导，通胀对其影响被政策对冲，系数方向与理论负向关系不符，无统计意义。</p></li>
+<li><p><strong>白酒行业</strong> 平均 gamma 为正，敏感度相对较高。 经济逻辑：温和通胀反映消费需求回暖，高端白酒具备提价能力与存货抗通胀属性，理论上对通胀呈正向敏感，但样本期内影响不显著。</p></li>
+<li><p><strong>汽车与通讯行业</strong> 汽车 gamma 偏正、通讯接近0，均不显著。 经济逻辑：汽车收益更多受居民购买力、行业政策驱动，通讯偏公用事业属性，二者受 CPI 直接影响极弱。</p></li>
+</ol>
+<hr>
+</section>
+<section id="结论" class="level3">
+<h3 class="anchored" data-anchor-id="结论">结论</h3>
+<p>CPI 对样本内行业收益<strong>无显著解释力</strong>，说明 A 股月度收益核心驱动因素为市场风险、行业景气、政策与流动性，而非通胀水平。仅传统能源股对 CPI 存在边际负向敏感，行业间的系数方向差异，本质是<strong>利率传导、需求弹性、定价权</strong>的不同，而非 CPI 的直接显著影响。</p>
+<hr>
+</section>
+<section id="保存分析结果" class="level3">
+<h3 class="anchored" data-anchor-id="保存分析结果">保存分析结果</h3>
+<div id="df17c6fd" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-04-05T11:56:24.178026Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-04-05T11:56:24.178026Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-04-05T11:56:24.188668Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-04-05T11:56:24.187645Z&quot;}}" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"保存分析结果"</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>capm_df.to_csv(<span class="ss">f"</span><span class="sc">{</span>project_root<span class="sc">}</span><span class="ss">/output/capm_results.csv"</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>               index<span class="op">=</span><span class="va">False</span>, encoding<span class="op">=</span><span class="st">"utf-8-sig"</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"CAPM回归结果已保存: output/capm_results.csv"</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">图形文件列表："</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> os.listdir(<span class="ss">f"</span><span class="sc">{</span>project_root<span class="sc">}</span><span class="ss">/output"</span>):</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> f.endswith(<span class="st">'.png'</span>) <span class="kw">and</span> <span class="st">'capm'</span> <span class="kw">in</span> f.lower():</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  - </span><span class="sc">{</span>f<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+保存分析结果
+============================================================
+CAPM回归结果已保存: output/capm_results.csv
+
+图形文件列表：
+  - fig6_capm_beta.png</code></pre>
+</div>
+</div>
+<p>将CAPM回归结果保存为CSV文件，图形文件已保存至output目录。</p>
+<hr>
+</section>
+<section id="本-notebook-完成情况" class="level3">
+<h3 class="anchored" data-anchor-id="本-notebook-完成情况">本 Notebook 完成情况</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>任务</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1. CAPM 回归分析</td>
+<td>checked</td>
+</tr>
+<tr class="even">
+<td>2. CAPM Beta 可视化</td>
+<td>checked</td>
+</tr>
+<tr class="odd">
+<td>3. CAPM 分析讨论</td>
+<td>checked</td>
+</tr>
+<tr class="even">
+<td>4. 宏观指标回归（CPI）</td>
+<td>checked</td>
+</tr>
+<tr class="odd">
+<td>5. 宏观指标回归结果可视化</td>
+<td>checked</td>
+</tr>
+<tr class="even">
+<td>6. 宏观指标回归分析讨论</td>
+<td>checked</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./03_regression_analysis.html" class="pagination-link" aria-label="P03：描述性统计与回归分析">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">P03：描述性统计与回归分析</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/PYC1234/dshw-p02/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
