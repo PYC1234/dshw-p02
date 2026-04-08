@@ -83,4 +83,4 @@ jupyter notebook 04_capm_analysis.ipynb
 
 ### GitHub 仓库
 
-https://github.com/PYC1234/dshw-p01
+https://github.com/PYC1234/dshw-p02
